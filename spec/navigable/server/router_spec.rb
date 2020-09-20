@@ -1,10 +1,10 @@
 RSpec.describe Navigable::Server::Router do
   subject(:router) { described_class.new }
 
-  let(:hanami_router) { instance_double(Hanami::Router, call: true) }
+  let(:navigable_router) { instance_double(Navigable::Router, call: true) }
 
   before do
-    allow(Hanami::Router).to receive(:new).and_return(hanami_router)
+    allow(Navigable::Router).to receive(:new).and_return(navigable_router)
   end
 
   describe '#call' do
@@ -14,8 +14,8 @@ RSpec.describe Navigable::Server::Router do
 
     before { call }
 
-    it 'delegates to the hanami router' do
-      expect(hanami_router).to have_received(:call).with(env)
+    it 'delegates to the navigable router' do
+      expect(navigable_router).to have_received(:call).with(env)
     end
   end
 
@@ -31,8 +31,7 @@ RSpec.describe Navigable::Server::Router do
 
     before do
       allow(Navigable::Server::RackAdapter).to receive(:new).and_return(rack_adapter)
-      allow(Navigable::Server::Routes).to receive(:new).and_return(routes)
-      allow(hanami_router).to receive(verb)
+      allow(navigable_router).to receive(verb)
       add_endpoint
     end
 
@@ -42,24 +41,8 @@ RSpec.describe Navigable::Server::Router do
         .with(endpoint_class: endpoint_class)
     end
 
-    it 'adds the route to the hanami router' do
-      expect(hanami_router).to have_received(verb).with(path, to: rack_adapter)
-    end
-
-    it 'adds a route to the routes' do
-      expect(routes).to have_received(:add).with(verb, path, endpoint_class)
-    end
-  end
-
-  describe '#routes' do
-    subject(:routes) { router.routes }
-
-    it 'returns a routes object' do
-      expect(routes).to be_a_kind_of(Navigable::Server::Routes)
-    end
-
-    it 'returns the same object every time' do
-      expect(routes).to eq(router.routes)
+    it 'adds the route to the navigable router' do
+      expect(navigable_router).to have_received(verb).with(path, to: rack_adapter)
     end
   end
 end

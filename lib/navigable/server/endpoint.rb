@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module Navigable
   module Server
     class Endpoint
-      EXECUTE_NOT_IMPLEMENTED_MESSAGE = 'Class must implement `execute` method.'.freeze
+      EXECUTE_NOT_IMPLEMENTED_MESSAGE = 'Class must implement `execute` method.'
 
       def self.responds_to(verb, path)
         Navigable::Server.add_endpoint(verb: verb, path: path, endpoint_class: self)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Navigable
   module Server
     class RackAdapter
@@ -8,11 +10,17 @@ module Navigable
       end
 
       def call(env)
-        request = Request.new(env)
-        endpoint = endpoint_class.new(request: request)
-        response = Response.new(endpoint.execute)
+        Response.new(endpoint(request(env)).execute).to_rack_response
+      end
 
-        response.to_rack_response
+      private
+
+      def request(env)
+        Request.new(env)
+      end
+
+      def endpoint(request)
+        endpoint_class.new(request: request)
       end
     end
   end

@@ -1,4 +1,6 @@
-require 'hanami/router'
+# frozen_string_literal: true
+
+require 'navigable/router'
 require 'json'
 require 'navigable'
 require 'rack'
@@ -11,15 +13,18 @@ require 'navigable/server/version'
 require 'navigable/server/request'
 require 'navigable/server/response'
 require 'navigable/server/rack_adapter'
-require 'navigable/server/routes'
 require 'navigable/server/router'
 require 'navigable/server/endpoint'
 
 module Navigable
   module Server
+    BODY_PARSERS = {
+      'application/json' => proc { |data| JSON.parse(data) }
+    }.freeze
+
     def self.rack_app
       @server ||= Rack::Builder.new(Server.router) do
-        use Rack::BodyParser, :parsers => { 'application/json' => proc { |data| JSON.parse(data) } }
+        use Rack::BodyParser, :parsers => BODY_PARSERS
         use Rack::AbstractFormat
       end
     end

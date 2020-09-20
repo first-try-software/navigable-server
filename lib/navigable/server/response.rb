@@ -1,6 +1,14 @@
+# frozen_string_literal: true
+
 module Navigable
   module Server
     class Response
+      CONTENT_TYPE = 'Content-Type'
+      MIME_TYPE_JSON = 'application/json'
+      MIME_TYPE_HTML = 'text/html'
+      MIME_TYPE_TEXT = 'text/plain'
+      EMPTY_CONTENT = ''
+
       attr_reader :params, :status
 
       def initialize(params)
@@ -16,23 +24,23 @@ module Navigable
 
       def headers
         headers = params[:headers] || {}
-        headers['Content-Type'] = content_type if content_type
+        headers[CONTENT_TYPE] = content_type if content_type
         headers
       end
 
       def content_type
-        return 'application/json' if json
-        return 'text/html' if html
-        return 'text/plain' if text
+        return MIME_TYPE_JSON if json
+        return MIME_TYPE_HTML if html
+        return MIME_TYPE_TEXT if text
       end
 
       def content
-        [json || html || text || body || ""]
+        [json || html || text || body || EMPTY_CONTENT]
       end
 
       def json
         return unless params[:json]
-        return params[:json].to_s if valid_json?(params[:json])
+        return stringified_json if valid_json?
 
         params[:json].to_json
       end
@@ -49,11 +57,15 @@ module Navigable
         params[:body]
       end
 
-      def valid_json?(json)
-        JSON.parse(json.to_s)
+      def valid_json?
+        JSON.parse(stringified_json)
         return true
       rescue JSON::ParserError => e
         return false
+      end
+
+      def stringified_json
+        @stringified_json ||= params[:json].to_s
       end
     end
   end
