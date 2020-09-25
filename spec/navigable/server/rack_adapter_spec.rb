@@ -9,7 +9,7 @@ RSpec.describe Navigable::Server::RackAdapter do
     let(:env) { instance_double('env') }
     let(:request) { instance_double(Navigable::Server::Request) }
     let(:response) { instance_double(Navigable::Server::Response, to_rack_response: rack_response) }
-    let(:endpoint) { instance_double('endpoint', execute: execution_result) }
+    let(:endpoint) { instance_double('endpoint', inject: true, execute: execution_result) }
     let(:execution_result) { { status: 200, json: {} } }
     let(:rack_response) { ['status', 'headers', ['body']] }
 
@@ -25,8 +25,12 @@ RSpec.describe Navigable::Server::RackAdapter do
       expect(Navigable::Server::Request).to have_received(:new).with(env)
     end
 
-    it 'instantiates an endpoint object with the request' do
-      expect(endpoint_class).to have_received(:new).with(request: request)
+    it 'instantiates an endpoint object' do
+      expect(endpoint_class).to have_received(:new)
+    end
+
+    it 'injects the request into the endpoint' do
+      expect(endpoint).to have_received(:inject).with(request: request)
     end
 
     it 'executes the endpoint' do

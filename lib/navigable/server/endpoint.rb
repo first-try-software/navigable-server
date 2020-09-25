@@ -2,21 +2,27 @@
 
 module Navigable
   module Server
-    class Endpoint
+    module Endpoint
       EXECUTE_NOT_IMPLEMENTED_MESSAGE = 'Class must implement `execute` method.'
 
-      def self.responds_to(verb, path)
-        Navigable::Server.add_endpoint(verb: verb, path: path, endpoint_class: self)
-      end
+      def self.extended(base)
+        base.instance_eval do
+          def responds_to(verb, path)
+            Navigable::Server.add_endpoint(verb: verb, path: path, endpoint_class: self)
+          end
+        end
 
-      attr_reader :request
+        base.class_eval do
+          attr_reader :request
 
-      def initialize(request: Request.new)
-        @request = request
-      end
+          def inject(request: Request.new)
+            @request = request
+          end
 
-      def execute
-        raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE)
+          def execute
+            raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE)
+          end
+        end
       end
     end
   end
