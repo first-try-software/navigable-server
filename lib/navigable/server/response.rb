@@ -4,6 +4,7 @@ module Navigable
   module Server
     class Response
       CONTENT_TYPE = 'Content-Type'
+      CONTENT_LENGTH = 'Content-Length'
       MIME_TYPE_JSON = 'application/json'
       MIME_TYPE_HTML = 'text/html'
       MIME_TYPE_TEXT = 'text/plain'
@@ -17,14 +18,16 @@ module Navigable
       end
 
       def to_rack_response
-        [status, headers, content]
+        [status, headers, [content]]
       end
 
       private
 
       def headers
-        headers = params[:headers] || {}
+        headers = {}
         headers[CONTENT_TYPE] = content_type if content_type
+        headers[CONTENT_LENGTH] = content_length
+        headers.merge!(params[:headers]) if params[:headers]
         headers
       end
 
@@ -34,8 +37,12 @@ module Navigable
         return MIME_TYPE_TEXT if text
       end
 
+      def content_length
+        content.bytesize
+      end
+
       def content
-        [json || html || text || body || EMPTY_CONTENT]
+        json || html || text || body || EMPTY_CONTENT
       end
 
       def json

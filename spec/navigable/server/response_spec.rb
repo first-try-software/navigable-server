@@ -60,7 +60,11 @@ RSpec.describe Navigable::Server::Response do
         let(:params) { { body: '0x0123' } }
 
         it 'does not add a content type header' do
-          expect(to_rack_response).to match_array([anything, {}, anything])
+          expect(to_rack_response).to match_array([
+            anything,
+            hash_excluding({ 'Content-Type' => anything }),
+            anything
+          ])
         end
       end
     end
@@ -90,30 +94,40 @@ RSpec.describe Navigable::Server::Response do
       end
 
       context 'and the headers include content type' do
+        let(:params) { { headers: headers, text: '' } }
         let(:headers) { { 'Content-Type' => 'image/png' } }
 
-        context 'and the content is JSON, HTML or text' do
-          let(:params) { { headers: headers, text: '' } }
-
-          it 'overrides the provided content type' do
-            expect(to_rack_response).to match_array([
-              anything,
-              a_hash_including('Content-Type' => 'text/plain'),
-              anything
-            ])
-          end
+        it 'honors the user-provided content type' do
+          expect(to_rack_response).to match_array([
+            anything,
+            a_hash_including('Content-Type' => 'image/png'),
+            anything
+          ])
         end
+      end
 
-        context 'and the content is NOT JSON, HTML or text' do
-          let(:params) { { headers: headers, body: '' } }
+      context 'and the headers do NOT include content length' do
+        let(:params) { { headers: headers, text: 'Ahøy!' } }
 
-          it 'does NOT alter the content type' do
-            expect(to_rack_response).to match_array([
-              anything,
-              a_hash_including('Content-Type' => 'image/png'),
-              anything
-            ])
-          end
+        it 'adds a content length header' do
+          expect(to_rack_response).to match_array([
+            anything,
+            a_hash_including('Content-Length' => 6),
+            anything
+          ])
+        end
+      end
+
+      context 'and the headers include content length' do
+        let(:params) { { headers: headers, text: '' } }
+        let(:headers) { { 'Content-Length' => 42 } }
+
+        it 'honors the user-provided content length' do
+          expect(to_rack_response).to match_array([
+            anything,
+            a_hash_including('Content-Length' => 42),
+            anything
+          ])
         end
       end
     end
