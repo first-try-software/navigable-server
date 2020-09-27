@@ -72,7 +72,68 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+`Navigable::Server` is a different kind of server. Rather than registering routes in a route file, `Endpoint` classes register themselves at startup using the `responds_to` method. When the route is requested, `Navigable::Server` injects the `Request` into the `Endpoint` and calls the `execute` method.
+
+```ruby
+class AhoyEndpoint
+  extend Navigable::Server::Endpoint
+
+  responds_to :get, '/ahoy'
+
+  def execute
+    { status: 200, html: '<h1>Ahoy! Welcome aboard Navigable!</h1>' }
+  end
+end
+```
+The `execute` method should return a hash containing:
+
+* Some content (either `json`, `html`, `text`, or `body`)
+* An optional status code (default = 200)
+* Optional headers (`Navigable::Server` sets `Content-Type` and `Content-Length` for you if they can be inferred)
+
+Here are three examples:
+
+```ruby
+# returning successful creation of SomeActiveRecordModel
+class CreateSomeActiveRecordModelEndpoint
+  extend Navigable::Server::Endpoint
+
+  responds_to :post, '/models'
+
+  def execute
+    model = SomeActiveRecordModel.create(request.params)
+    { status: 201, json: model }
+  end
+end
+
+# Returning 404 Not Found
+class ShowSomeActiveRecordModelEndpoint
+  extend Navigable::Server::Endpoint
+
+  responds_to :get, '/models/:id'
+
+  def execute
+    model = SomeActiveRecordModel.find_by(id: request.params[:id])
+
+    return { status: 404, text: 'Not Found' } unless model
+
+    { json: model }
+  end
+end
+
+# Returning an image
+class ShowTreasureMapEndpoint
+  extend Navigable::Server::Endpoint
+
+  responds_to :get, '/treasure-map'
+
+  def execute
+    treasure_map = read_file('x_marks_the_spot.png')
+    { headers: { 'Content-Type' => 'image/png' }, body: treasure_map }
+  end
+end
+```
+If you are considering creating a JSON API with `Navigable::Server`, you should know about `Navigable::API` and `Navigable::GraphQL`. Both of these gems extend `Navigable::Server` in ways that bring all of Navigable together from `Commands` and `Observers`, to `Endpoints` and `Resolvers`.
 
 ## Development
 
