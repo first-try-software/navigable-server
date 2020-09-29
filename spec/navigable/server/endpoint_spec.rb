@@ -23,11 +23,15 @@ RSpec.describe Navigable::Server::Endpoint do
     end
   end
 
-  describe '#execute' do
-    subject(:execute) { endpoint_class.new.execute }
+  describe '.executes' do
+    subject(:executes) { endpoint_class.executes(:swab_the_decks) }
 
-    it 'yells at you to implement the method in your endpoint class' do
-      expect { execute }.to raise_error(NotImplementedError)
+    let(:endpoint_class) { Class.new { extend Navigable::Server::Endpoint } }
+
+    before { executes }
+
+    it 'sets the command key on the class' do
+      expect(endpoint_class.instance_variable_get(:@command_key)).to eq(:swab_the_decks)
     end
   end
 
@@ -54,6 +58,43 @@ RSpec.describe Navigable::Server::Endpoint do
       it 'sets the request' do
         expect(endpoint.request).to eq(request)
       end
+    end
+  end
+
+  describe '#execute' do
+    subject(:execute) { endpoint.execute }
+
+    let(:endpoint_class) do
+      Class.new { extend Navigable::Server::Endpoint; executes :swab_the_decks }
+    end
+
+    let(:endpoint) { endpoint_class.new }
+
+    let(:command_key) { :swab_the_decks }
+    let(:request) { instance_double(Navigable::Server::Request, headers: headers, params: params) }
+    let(:headers) { { preferred_media_type: 'application/json' } }
+    let(:params) { 'params' }
+    let(:result) { 'result' }
+
+    before do
+      allow(Navigable::Dispatcher).to receive(:dispatch).and_return(result)
+      endpoint.inject(request: request)
+    end
+
+    it 'dispatches the command key' do
+      execute
+
+      expect(Navigable::Dispatcher)
+        .to have_received(:dispatch)
+        .with(
+          command_key,
+          params: request.params,
+          resolver: a_kind_of(Navigable::NullResolver)
+        )
+    end
+
+    it 'returns the result of dispatching the command' do
+      expect(execute).to eq(result)
     end
   end
 end
