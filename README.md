@@ -33,15 +33,6 @@ A Rack-based server for building Ruby and Navigable web applications.
 </td>
 </tr>
 <tr height="140">
-<td width="130"><img alt="Telescope" src="https://raw.githubusercontent.com/first-try-software/navigable/main/assets/telescope.png"></td>
-<td>
-
-**Navigable API** *(coming soon)*<br>
-An extension of Navigable Server for building restful JSON APIs.
-
-</td>
-</tr>
-<tr height="140">
 <td width="130"><img alt="Map" src="https://raw.githubusercontent.com/first-try-software/navigable/main/assets/map.png"></td>
 <td>
 
@@ -52,7 +43,7 @@ An extension of Navigable Server for building GraphQL APIs.
 </tr>
 </table>
 
-<br><br>
+<br>
 
 ## Installation
 
@@ -133,7 +124,76 @@ class ShowTreasureMapEndpoint
   end
 end
 ```
-If you are considering creating a JSON API with `Navigable::Server`, you should know about `Navigable::API` and `Navigable::GraphQL`. Both of these gems extend `Navigable::Server` in ways that bring all of Navigable together from `Commands` and `Observers`, to `Endpoints` and `Resolvers`.
+Alternatively, you can declare that your endpoint executes a specific Navigable command by calling the `executes` method, like this:
+
+```ruby
+class RecruitSwabbieEndpoint
+  extend Navigable::Server::Endpoint
+
+  responds_to :get, '/ahoy'
+  executes :recruit_swabbie
+end
+```
+This tells the server to automatically execute the command associated with the key `:recruit_swabbie`. The command might look something like this:
+
+```ruby
+class RecruitSwabbie
+  extend Navigable::Command
+
+  corresponds_to :recruit_swabbie
+
+  def execute
+    return failed(recruit) unless swabbie_material?
+
+    successfully recruited_swabbie
+  end
+
+  private
+
+  def recruit
+    Swabbie.new(params)
+  end
+
+  def swabbie_material?
+    !recruit.drunk? && !recruit.pirate? && !recruit.seasick?
+  end
+
+  def recruited_swabbie
+    SwabbieRepository.create(recruit)
+  end
+end
+```
+Finally, you can use a Resolver class to handle requests for specific MIME types. Here's a `JSONResolver` class that prepares the data from the command to be returned as JSON:
+
+```ruby
+class JSONResolver
+  extend Navigable::Resolver
+
+  resolves 'application/json'
+
+  def resolve
+    @response
+  end
+
+  def on_success(recruit)
+    @response = { json: recruit }
+  end
+
+  def on_failure(recruit)
+    @response = { json: { errors: errors(recruit) } }
+  end
+
+  private
+
+  def errors(recruit)
+    errors = []
+    errors << 'They are a drunken mess!' if recruit.drunk?
+    errors << 'They are wanted for piracy on three continents!' if recruit.pirate?
+    errors << 'One step aboard and they turned blue and tossed!' if recruit.seasick?
+  end
+end
+```
+Visit the Navigable Wiki for more information on [Resolvers][resolvers].
 
 ## Development
 
@@ -144,7 +204,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/first-try-software/navigable-server. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/first-try-software/navigable-server/blob/master/CODE_OF_CONDUCT.md).
-
 
 ## License
 
@@ -157,3 +216,4 @@ Everyone interacting in the Navigable::Server project's codebases, issue tracker
 [navigable]: https://github.com/first-try-software/navigable
 [router]: https://github.com/first-try-software/navigable-router
 [server]: https://github.com/first-try-software/navigable-server
+[resolvers]: https://github.com/first-try-software/navigable/wiki/Resolvers
