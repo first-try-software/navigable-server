@@ -6,50 +6,53 @@ module Navigable
       EXECUTE_NOT_IMPLEMENTED_MESSAGE = 'Endpoint classes must either call `executes` or implement an `execute` method.'
 
       def self.extended(base)
-        base.instance_eval do
-          def responds_to(verb, path)
-            Navigable::Server.add_endpoint(verb: verb, path: path, endpoint_class: self)
-          end
+        base.extend(ClassMethods)
+        base.include(InstanceMethods)
+      end
 
-          def executes(command_key)
-            @command_key = command_key
-          end
+      module ClassMethods
+        def responds_to(verb, path)
+          Navigable::Server.add_endpoint(verb: verb, path: path, endpoint_class: self)
         end
 
-        base.class_eval do
-          attr_reader :request
+        def executes(command_key)
+          @command_key = command_key
+        end
+      end
 
-          def inject(request: Request.new)
-            @request = request
-          end
+      module InstanceMethods
+        attr_reader :request
 
-          def execute
-            raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE) unless command_key
+        def inject(request: Request.new)
+          @request = request
+        end
 
-            dispatch
-          end
+        def execute
+          raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE) unless command_key
 
-          private
+          dispatch
+        end
 
-          def dispatch
-            Navigable::Dispatcher.dispatch(command_key, params: params, resolver: resolver)
-          end
+        private
 
-          def command_key
-            self.class.instance_variable_get(:@command_key)
-          end
+        def dispatch
+          Navigable::Dispatcher.dispatch(command_key, params: params, resolver: resolver)
+        end
 
-          def params
-            request.params
-          end
+        def command_key
+          self.class.instance_variable_get(:@command_key)
+        end
 
-          def preferred_media_type
-            request.headers[:preferred_media_type]
-          end
+        def params
+          request.params
+        end
 
-          def resolver
-            Manufacturable.build_one(Resolver::TYPE, preferred_media_type) || Navigable::NullResolver.new
-          end
+        def preferred_media_type
+          request.headers[:preferred_media_type]
+        end
+
+        def resolver
+          Manufacturable.build_one(Resolver::TYPE, preferred_media_type) || Navigable::NullResolver.new
         end
       end
     end
