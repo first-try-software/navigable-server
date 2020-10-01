@@ -38,7 +38,7 @@ module Navigable
       end
 
       def content_length
-        content.bytesize
+        content.bytesize.to_s
       end
 
       def content

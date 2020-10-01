@@ -112,7 +112,7 @@ RSpec.describe Navigable::Server::Response do
         it 'adds a content length header' do
           expect(to_rack_response).to match_array([
             anything,
-            a_hash_including('Content-Length' => 6),
+            a_hash_including('Content-Length' => '6'),
             anything
           ])
         end
@@ -120,12 +120,12 @@ RSpec.describe Navigable::Server::Response do
 
       context 'and the headers include content length' do
         let(:params) { { headers: headers, text: '' } }
-        let(:headers) { { 'Content-Length' => 42 } }
+        let(:headers) { { 'Content-Length' => '42' } }
 
         it 'honors the user-provided content length' do
           expect(to_rack_response).to match_array([
             anything,
-            a_hash_including('Content-Length' => 42),
+            a_hash_including('Content-Length' => '42'),
             anything
           ])
         end
