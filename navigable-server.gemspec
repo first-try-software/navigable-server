@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'json', '~> 2.3'
-  spec.add_dependency 'navigable', '~> 1.3'
+  spec.add_dependency 'navigable', '~> 1.5'
   spec.add_dependency 'navigable-router', '~>0.2'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'rack-abstract-format', '~> 0.9.9'
