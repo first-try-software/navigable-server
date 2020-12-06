@@ -4,6 +4,8 @@ module Navigable
   module Server
     module Endpoint
       EXECUTE_NOT_IMPLEMENTED_MESSAGE = 'Endpoint classes must either call `executes` or implement an `execute` method.'
+      UNAUTHENTICATED = { status: 401, text: 'Unauthorized' }.freeze
+      UNAUTHORIZED = { status: 403, text: 'Forbidden' }.freeze
 
       def self.extended(base)
         base.extend(ClassMethods)
@@ -30,6 +32,9 @@ module Navigable
         def execute
           raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE) unless command_key
 
+          return unauthenticated unless authenticated?
+          return unauthorized unless authorized?
+
           dispatch
         end
 
@@ -53,6 +58,22 @@ module Navigable
 
         def resolver
           Manufacturable.build_one(Resolver::TYPE, preferred_media_type) || Navigable::NullResolver.new
+        end
+
+        def unauthenticated
+          UNAUTHENTICATED
+        end
+
+        def unauthorized
+          UNAUTHORIZED
+        end
+
+        def authenticated?
+          true
+        end
+
+        def authorized?
+          true
         end
       end
     end
