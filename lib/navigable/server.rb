@@ -15,6 +15,7 @@ require 'navigable/server/response'
 require 'navigable/server/rack_adapter'
 require 'navigable/server/router'
 require 'navigable/server/endpoint'
+require 'navigable/server/cors'
 
 module Navigable
   module Server
@@ -24,6 +25,7 @@ module Navigable
 
     def self.rack_app
       @server ||= Rack::Builder.new(Server.router) do
+        use Navigable::Server::CORS::Middleware
         use Rack::BodyParser, :parsers => BODY_PARSERS
         use Rack::AbstractFormat
       end

@@ -7,6 +7,48 @@ RSpec.describe 'Server' do
 
   after { Manufacturable.reset! }
 
+  context 'when the endpoint overrides authenticated to return false' do
+    let!(:endpoint_class) do
+      Class.new do
+        extend Navigable::Server::Endpoint
+
+        responds_to :get, '/ahoy'
+
+        executes :ahoy_matey
+
+        def authenticated?
+          false
+        end
+      end
+    end
+
+    it 'returns an unauthenticated response' do
+      expect(response.status).to eq(401)
+      expect(response.body).to eq('Unauthorized')
+    end
+  end
+
+  context 'when the endpoint overrides authorized to return false' do
+    let!(:endpoint_class) do
+      Class.new do
+        extend Navigable::Server::Endpoint
+
+        responds_to :get, '/ahoy'
+
+        executes :ahoy_matey
+
+        def authorized?
+          false
+        end
+      end
+    end
+
+    it 'returns an unauthorized response' do
+      expect(response.status).to eq(403)
+      expect(response.body).to eq('Forbidden')
+    end
+  end
+
   context 'when the endpoint does NOT declare a command to execute' do
     context 'and the endpoint does NOT define an execute method' do
       let!(:endpoint_class) do
