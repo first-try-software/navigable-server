@@ -53,8 +53,10 @@ RSpec.describe Navigable::Server::Request do
     end
 
     context 'when the env is NOT nil' do
-      let(:env) { { 'parsed_body' => body_params, 'router.params' => url_params } }
-      let(:rack_request) { instance_double(Rack::Request, params: form_params) }
+      let(:env) { { 'router.params' => url_params } }
+      let(:rack_request) { instance_double(Rack::Request, body: request_body, media_type: media_type, params: form_params) }
+      let(:request_body) { instance_double('request_body', read: body_params.to_json, rewind: true) }
+      let(:media_type) { 'application/json' }
       let(:form_params) { { 'form_param' => 'form_value' } }
       let(:body_params) { { 'body_param' => 'body_value' } }
       let(:url_params) { { url_param: 'url_value' } }

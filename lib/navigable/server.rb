@@ -6,10 +6,12 @@ require 'navigable'
 require 'rack'
 require 'rack/accept_media_types'
 require 'rack/abstract_format'
-require 'rack/bodyparser'
 
 require 'navigable/server'
 require 'navigable/server/version'
+require 'navigable/server/parsers/json'
+require 'navigable/server/parsers/null'
+require 'navigable/server/parsers/factory'
 require 'navigable/server/request'
 require 'navigable/server/response'
 require 'navigable/server/rack_adapter'
@@ -26,7 +28,6 @@ module Navigable
     def self.rack_app
       @server ||= Rack::Builder.new(Server.router) do
         use Navigable::Server::CORS::Middleware
-        use Rack::BodyParser, :parsers => BODY_PARSERS
         use Rack::AbstractFormat
       end
     end

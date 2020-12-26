@@ -38,7 +38,19 @@ module Navigable
       end
 
       def body_params
-        symbolize_keys(env[PARSED_BODY] || {})
+        symbolize_keys(parsed_body || {})
+      end
+
+      def parsed_body
+        Parsers::Factory.build(media_type: media_type).parse(body)
+      end
+
+      def body
+        @body ||= rack_request.body.read.tap { rack_request.body.rewind }
+      end
+
+      def media_type
+        rack_request.media_type
       end
 
       def url_params

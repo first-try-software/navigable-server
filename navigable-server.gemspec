@@ -29,7 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'rack-abstract-format', '~> 0.9.9'
   spec.add_dependency 'rack-accept-media-types', '~> 0.9'
-  spec.add_dependency 'rack-bodyparser', '~> 1.0'
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 12.0"
