@@ -22,10 +22,6 @@ require 'navigable/server/cors'
 
 module Navigable
   module Server
-    BODY_PARSERS = {
-      'application/json' => proc { |data| JSON.parse(data) }
-    }.freeze
-
     def self.rack_app
       @server ||= Rack::Builder.new(Server.router) do
         use Navigable::Server::CORS::Middleware
