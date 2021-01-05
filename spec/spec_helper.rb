@@ -5,6 +5,7 @@ end
 
 require "bundler/setup"
 require "navigable/server"
+require_relative "support/matchers"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -17,6 +17,7 @@ require 'navigable/server/response'
 require 'navigable/server/rack_adapter'
 require 'navigable/server/router'
 require 'navigable/server/endpoint'
+require 'navigable/server/endpoint_command'
 require 'navigable/server/cors'
 
 module Navigable
