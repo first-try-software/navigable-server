@@ -64,7 +64,7 @@ RSpec.describe Navigable::Server::EndpointCommand do
           .with(
             verb: verb,
             path: path,
-            endpoint_class: a_class_extending(Navigable::Server)
+            endpoint_class: a_class_extending(Navigable::Server::Endpoint)
           )
       end
 
