@@ -32,13 +32,15 @@ module Navigable
         def execute
           raise NotImplementedError.new(EXECUTE_NOT_IMPLEMENTED_MESSAGE) unless command_key
 
-          return unauthenticated unless authenticated?
-          return unauthorized unless authorized?
-
-          dispatch
+          auth_response || dispatch
         end
 
         private
+
+        def auth_response
+          return unauthenticated unless authenticated?
+          return unauthorized unless authorized?
+        end
 
         def dispatch
           Navigable::Dispatcher.dispatch(command_key, params: params, resolver: resolver)
